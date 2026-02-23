@@ -25,7 +25,7 @@ export class InMemoryCommandBus implements ICommandBus {
   private handlers = new Map<string, ICommandHandler<Command, unknown>>();
 
   register<TCommand extends Command, TResult = void>(
-    commandClass: new (...args: unknown[]) => TCommand,
+    commandClass: new (...args: any[]) => TCommand,
     handler: ICommandHandler<TCommand, TResult>
   ): void {
     const commandName = commandClass.name;
@@ -51,7 +51,7 @@ export class InMemoryCommandBus implements ICommandBus {
   /**
    * Check if a handler is registered for a command type
    */
-  hasHandler(commandClass: new (...args: unknown[]) => Command): boolean {
+  hasHandler(commandClass: new (...args: any[]) => Command): boolean {
     return this.handlers.has(commandClass.name);
   }
 
@@ -82,7 +82,7 @@ export class InMemoryQueryBus implements IQueryBus {
   private handlers = new Map<string, IQueryHandler<Query, unknown>>();
 
   register<TQuery extends Query, TResult>(
-    queryClass: new (...args: unknown[]) => TQuery,
+    queryClass: new (...args: any[]) => TQuery,
     handler: IQueryHandler<TQuery, TResult>
   ): void {
     const queryName = queryClass.name;
@@ -108,7 +108,7 @@ export class InMemoryQueryBus implements IQueryBus {
   /**
    * Check if a handler is registered for a query type
    */
-  hasHandler(queryClass: new (...args: unknown[]) => Query): boolean {
+  hasHandler(queryClass: new (...args: any[]) => Query): boolean {
     return this.handlers.has(queryClass.name);
   }
 
