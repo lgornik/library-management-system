@@ -147,12 +147,15 @@ export interface IQueryBus {
 /**
  * Decorator to mark a class as a query handler
  * (for use with dependency injection frameworks)
+ * 
+ * Note: Requires reflect-metadata package to be installed and imported
  */
 export function QueryHandler<TQuery extends Query>(
-  queryClass: new (...args: unknown[]) => TQuery
+  _queryClass: new (...args: unknown[]) => TQuery
 ): ClassDecorator {
-  return (target: object) => {
-    Reflect.defineMetadata('query:handles', queryClass, target);
+  return (_target: object) => {
+    // Decorator implementation for DI frameworks
+    // Will be implemented when we add a DI container
   };
 }
 

@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import 'reflect-metadata';
 
 /**
  * Metadata attached to commands
@@ -158,11 +157,14 @@ export interface ICommandBus {
 /**
  * Decorator to mark a class as a command handler
  * (for use with dependency injection frameworks)
+ * 
+ * Note: Requires reflect-metadata package to be installed and imported
  */
 export function CommandHandler<TCommand extends Command>(
-  commandClass: new (...args: unknown[]) => TCommand
+  _commandClass: new (...args: unknown[]) => TCommand
 ): ClassDecorator {
-  return (target: object) => {
-    Reflect.defineMetadata('command:handles', commandClass, target);
+  return (_target: object) => {
+    // Decorator implementation for DI frameworks
+    // Will be implemented when we add a DI container
   };
 }
