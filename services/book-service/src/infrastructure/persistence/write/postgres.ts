@@ -105,3 +105,51 @@ export async function healthCheck(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Initializes the database schema if it doesn't exist.
+ * This makes the service "ready to go" on any new environment.
+ */
+export async function initializeDatabase(): Promise<void> {
+  const schema = `
+    CREATE TABLE IF NOT EXISTS books (
+        id UUID PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        author_id UUID NOT NULL,
+        page_count INTEGER NOT NULL,
+        isbn VARCHAR(20) UNIQUE,
+        year_read INTEGER,
+        status VARCHAR(50) NOT NULL,
+        rating INTEGER,
+        cover_url TEXT,
+        version INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS quotes (
+        id UUID PRIMARY KEY,
+        book_id UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        page INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS notes (
+        id UUID PRIMARY KEY,
+        book_id UUID NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        chapter VARCHAR(255),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+  `;
+
+  try {
+    console.log('🐘 PostgreSQL: Ensuring schema exists...');
+    await query(schema);
+    console.log('🐘 PostgreSQL: Schema is ready.');
+  } catch (error) {
+    console.error('🐘 PostgreSQL: Error during schema initialization:', error);
+    throw error;
+  }
+}

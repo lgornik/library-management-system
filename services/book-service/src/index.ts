@@ -32,6 +32,7 @@ import {
   MarkBookAsFinishedHandler,
   AddQuoteHandler,
 } from './application/index.js';
+import { initializeDatabase } from './infrastructure/persistence/write/postgres.js';
 
 /**
  * Book Service Application
@@ -132,10 +133,14 @@ export class BookServiceApp {
   private async connectDatabases(): Promise<void> {
     console.log('📦 Connecting to databases...');
 
-    // Connect to MongoDB (Read Model)
+    // 1. Inicjalizacja schematu PostgreSQL
+    // Wywołujemy to przed innymi operacjami, by tabele były gotowe
+    await initializeDatabase(); 
+
+    // 2. Połączenie z MongoDB (Read Model)
     await connectMongo();
 
-    // Connect to RabbitMQ (Event Bus)
+    // 3. Połączenie z RabbitMQ (Event Bus)
     await connectRabbitMQ();
 
     // PostgreSQL connects lazily on first query
@@ -199,23 +204,27 @@ export class BookServiceApp {
 // Main entry point
 // ==========================================================================
 
+// Tworzymy instancję, ale NIE odpalamy start() od razu
 const app = new BookServiceApp();
 
-// Handle shutdown signals
-process.on('SIGINT', async () => {
+// Funkcja pomocnicza do sprawdzania, czy to plik startowy
+const isMainModule = import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'));
+
+if (isMainModule) {
+  // Startuj tylko jeśli wpiszesz "node src/index.js"
+  app.start().catch((error) => {
+    console.error('❌ Failed to start Book Service:', error);
+    process.exit(1);
+  });
+}
+
+// Obsługa sygnałów (zawsze warto mieć)
+const shutdown = async () => {
   await app.stop();
   process.exit(0);
-});
+};
 
-process.on('SIGTERM', async () => {
-  await app.stop();
-  process.exit(0);
-});
-
-// Start the service
-app.start().catch((error) => {
-  console.error('❌ Failed to start Book Service:', error);
-  process.exit(1);
-});
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 export { app };

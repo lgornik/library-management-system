@@ -4,11 +4,12 @@
  * Run with: pnpm --filter @library/book-service test:manual
  */
 
+import { config } from './infrastructure/config/index.js';
 import { BookServiceApp } from './index.js';
 import {
   CreateBookCommand,
   AddQuoteCommand,
-  MarkBookAsFinishedCommand,
+  MarkBookAsFinishedCommand
 } from './application/index.js';
 import { ReadingStatus } from './domain/index.js';
 
@@ -20,26 +21,32 @@ async function runTests() {
   try {
     await app.start();
 
+    console.log('🔍 Database Connection Info:');
+    console.log(`   🐘 PostgreSQL: ${config.postgres.host}:${config.postgres.port} / DB: ${config.postgres.database}`);
+    console.log(`   📗 MongoDB:    ${config.mongodb.url.split('@')[1] || 'localhost'} (Base URL)`);
+    console.log(`   🐰 RabbitMQ:   ${config.rabbitmq.url.split('@')[1] || 'localhost'}`);
+    console.log('-----------------------------\n');
+
     const commandBus = app.getCommandBus();
     const readRepo = app.getReadRepository();
 
     // Wait a bit for connections to stabilize
-    await sleep(1000);
+    console.log('🧹 Cleaning database...');
+    await sleep(1000); // daj mu chwilę na przetworzenie usunięcia
 
     // ========================================================================
     // Test 1: Create a book
     // ========================================================================
     console.log('\n📖 Test 1: Creating a book...');
 
-    // Używamy poprawnych technicznie UUID (format 8-4-4-4-12)
     const VALID_AUTHOR_ID = '550e8400-e29b-41d2-a716-446655440000';
 
     const createResult = await commandBus.execute<{ bookId: string }>(
       new CreateBookCommand({
         title: 'Domain-Driven Design',
-        authorId: VALID_AUTHOR_ID, // Teraz Postgres to zaakceptuje
+        authorId: VALID_AUTHOR_ID,
         pageCount: 560,
-        isbn: '9780321125217',
+        isbn: '9788324631773', // <--- TEN NUMER JEST POPRAWNY MATEMATYCZNIE
         yearRead: 2024,
         status: ReadingStatus.READING,
       })
@@ -48,7 +55,7 @@ async function runTests() {
     console.log('   ✅ Book created:', createResult.bookId);
 
     // Wait for projection to update read model
-    await sleep(2000);
+    await sleep(5000);
 
     // ========================================================================
     // Test 2: Read the book from MongoDB
