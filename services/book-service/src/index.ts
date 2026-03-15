@@ -227,4 +227,28 @@ const shutdown = async () => {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
+// Re-export application layer for gateway consumers
+export {
+  CreateBookCommand,
+  UpdateBookCommand,
+  DeleteBookCommand,
+  MarkBookAsFinishedCommand,
+  AddQuoteCommand,
+  AddNoteCommand,
+  type CreateBookCommandPayload,
+  type UpdateBookCommandPayload,
+  type DeleteBookCommandPayload,
+  type MarkBookAsFinishedCommandPayload,
+  type AddQuoteCommandPayload,
+  type AddNoteCommandPayload,
+  type CreateBookResult,
+  type AddQuoteResult,
+  type BookListItemDto,
+  type BookDetailsDto,
+  type QuoteDto,
+  type NoteDto,
+  type AuthorYearStatsDto,
+  type YearlyStatsDto,
+} from './application/index.js';
+
 export { app };
