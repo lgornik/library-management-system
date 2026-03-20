@@ -96,6 +96,7 @@ export const bookTypeDefs = /* GraphQL */ `
     yearRead: Int
     rating: Int
     coverUrl: String
+    status: ReadingStatus
   }
 
   input MarkBookAsFinishedInput {

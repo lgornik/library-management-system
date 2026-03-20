@@ -10,6 +10,7 @@ export interface UpdateBookCommandPayload {
   yearRead?: number | null;
   rating?: number | null;
   coverUrl?: string | null;
+  status?: string;
 }
 
 /**

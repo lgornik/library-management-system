@@ -18,6 +18,19 @@ function handleError(error: unknown): never {
   });
 }
 
+async function waitForReadModel<T>(
+  fn: () => Promise<T | null>,
+  retries = 10,
+  delayMs = 200,
+): Promise<T | null> {
+  for (let i = 0; i < retries; i++) {
+    const result = await fn();
+    if (result) return result;
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return null;
+}
+
 // =============================================================================
 // Resolvers
 // =============================================================================
@@ -80,7 +93,19 @@ export const authorResolvers = {
         );
 
         const readRepo = getAuthorService().getReadRepository();
-        return await readRepo.findById(result.authorId);
+        const author = await waitForReadModel(() => readRepo.findById(result.authorId));
+        if (author) return author;
+
+        // Fallback: return data from write side when projection hasn't caught up
+        const now = new Date().toISOString();
+        return {
+          id: result.authorId,
+          name: args.input.name,
+          biography: args.input.biography ?? null,
+          nationality: args.input.nationality ?? null,
+          createdAt: now,
+          updatedAt: now,
+        };
       } catch (error) {
         handleError(error);
       }

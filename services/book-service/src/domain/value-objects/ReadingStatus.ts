@@ -53,13 +53,7 @@ export const ReadingStatusUtils = {
    * Get all possible transitions from a status
    */
   getAllowedTransitions(status: ReadingStatus): ReadingStatus[] {
-    const transitions: Record<ReadingStatus, ReadingStatus[]> = {
-      [ReadingStatus.TO_READ]: [ReadingStatus.READING],
-      [ReadingStatus.READING]: [ReadingStatus.FINISHED, ReadingStatus.ABANDONED, ReadingStatus.TO_READ],
-      [ReadingStatus.FINISHED]: [ReadingStatus.READING], // Re-read
-      [ReadingStatus.ABANDONED]: [ReadingStatus.READING, ReadingStatus.TO_READ],
-    };
-    return transitions[status];
+    return Object.values(ReadingStatus).filter(s => s !== status);
   },
 
   /**

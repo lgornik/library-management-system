@@ -58,6 +58,7 @@ export class BookProjections {
    * Updates existing book document
    */
   async onBookUpdated(payload: BookUpdatedEventPayload): Promise<void> {
+    console.log('📊 BookUpdated payload:', JSON.stringify(payload));
     const collection = getCollection<BookDocument>(Collections.BOOKS);
 
     const updateFields: Partial<BookDocument> = {
@@ -127,12 +128,16 @@ export class BookProjections {
   }
 
   /**
-   * Fetch author name from Author Service
-   * TODO: Implement gRPC call to Author Service
+   * Fetch author name from the authors read model in MongoDB.
    */
   private async fetchAuthorName(authorId: string): Promise<string> {
-    // Placeholder - will be replaced with gRPC call
-    return `Author ${authorId.substring(0, 8)}`;
+    try {
+      const authorsCol = getCollection<{ _id: string; name: string }>(Collections.AUTHORS);
+      const author = await authorsCol.findOne({ _id: authorId });
+      return author?.name ?? `Author ${authorId.substring(0, 8)}`;
+    } catch {
+      return `Author ${authorId.substring(0, 8)}`;
+    }
   }
 }
 

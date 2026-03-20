@@ -19,8 +19,8 @@ export class AuthorProjections {
     const document: AuthorDocument = {
       _id: payload.authorId,
       name: payload.name,
-      biography: payload.biography,
-      nationality: payload.nationality,
+      biography: payload.biography ?? '',
+      nationality: payload.nationality ?? '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -48,7 +48,10 @@ export class AuthorProjections {
     if (payload.changes.nationality !== undefined) {
       updateFields.nationality = payload.changes.nationality;
     }
-    await collection.updateOne
+    await collection.updateOne(
+      { _id: payload.authorId },
+      { $set: updateFields },
+    );
 
     console.log(`📊 Projection: Author updated in read model: ${payload.authorId}`);
   }

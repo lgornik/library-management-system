@@ -7,7 +7,7 @@ const configSchema = z.object({
   nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
 
   server: z.object({
-    port: z.coerce.number().default(4000),
+    port: z.coerce.number().default(4001),
   }),
 });
 
